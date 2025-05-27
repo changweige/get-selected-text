@@ -7,6 +7,7 @@ use core_foundation::string::CFString;
 use debug_print::debug_println;
 use lru::LruCache;
 use parking_lot::Mutex;
+use std::io::Error;
 
 static GET_SELECTED_TEXT_METHOD: Mutex<Option<LruCache<String, u8>>> = Mutex::new(None);
 
@@ -128,12 +129,14 @@ fn get_selected_text_by_clipboard_using_applescript() -> Result<String, Box<dyn 
         let content = content.trim();
         Ok(content.to_string())
     } else {
-        let err = output
-            .stderr
-            .into_iter()
-            .map(|c| c as char)
-            .collect::<String>()
-            .into();
-        Err(err)
+        let d = String::from_utf8(output.stderr)
+            .unwrap_or_else(|_| "Failed to read stderr".to_string());
+
+        let err = Error::new(
+            std::io::ErrorKind::Other,
+            format!("AppleScript failed: {}", d),
+        );
+
+        Err(Box::new(err))
     }
 }
