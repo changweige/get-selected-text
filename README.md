@@ -24,12 +24,16 @@ fn main() {
     match get_selected_text() {
         Ok(selected_text) => {
             println!("selected text: {}", selected_text);
-        },
-        Err(()) => {
-            println!("error occurred while getting the selected text");
+        }
+        Err(e) => {
+            println!(
+                "error occurred while getting the selected text, error: {}",
+                e
+            );
         }
     }
 }
+
 ```
 
 ## How does it work?
